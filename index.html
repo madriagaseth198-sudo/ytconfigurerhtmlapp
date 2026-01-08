@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Arcade & Messenger</title>
+    <title>AI Arcade Suite V2</title>
     <style>
         :root {
             --primary: #6C63FF;
@@ -11,8 +11,8 @@
             --darker: #161625;
             --light: #f5f6fa;
             --grey: #2e2e42;
-            --msg-user: #6C63FF;
-            --msg-ai: #2e2e42;
+            --tile-color: #f1dfa5;
+            --tile-text: #333;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -27,13 +27,9 @@
         }
         .auth-box {
             background: var(--dark); padding: 2rem; border-radius: 10px;
-            width: 350px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            text-align: center;
+            width: 350px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center;
         }
-        input {
-            width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px;
-            border: 1px solid #444; background: var(--darker); color: white;
-        }
+        input { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #444; background: var(--darker); color: white; }
         button {
             width: 100%; padding: 10px; background: var(--primary); color: white;
             border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 10px;
@@ -41,60 +37,73 @@
         button:hover { filter: brightness(1.1); }
         .switch-auth { margin-top: 15px; font-size: 0.9rem; cursor: pointer; color: #aaa; text-decoration: underline; }
 
-        /* --- MAIN LAYOUT --- */
+        /* --- LAYOUT --- */
         #app-container { display: none; height: 100vh; width: 100%; flex-direction: row; }
         
-        /* Sidebar */
-        .sidebar {
-            width: 250px; background: var(--dark); border-right: 1px solid #333;
-            display: flex; flex-direction: column; padding: 1rem;
-        }
+        .sidebar { width: 250px; background: var(--dark); border-right: 1px solid #333; display: flex; flex-direction: column; padding: 1rem; }
         .logo { font-size: 1.5rem; font-weight: bold; margin-bottom: 2rem; color: var(--primary); }
-        .nav-btn {
-            padding: 12px; margin-bottom: 5px; cursor: pointer; border-radius: 8px;
-            transition: 0.2s; display: flex; align-items: center;
-        }
+        .nav-btn { padding: 12px; margin-bottom: 5px; cursor: pointer; border-radius: 8px; transition: 0.2s; }
         .nav-btn:hover, .nav-btn.active { background: var(--grey); }
         .user-profile { margin-top: auto; padding-top: 1rem; border-top: 1px solid #333; display: flex; align-items: center; gap: 10px; }
-        .logout-btn { font-size: 0.8rem; color: #ff6b6b; cursor: pointer; }
-
-        /* Game Area */
+        
         .main-content { flex: 1; padding: 2rem; position: relative; overflow-y: auto; background-color: var(--darker); }
-        .game-screen { display: none; height: 100%; flex-direction: column; align-items: center; justify-content: center; }
+        .game-screen { display: none; height: 100%; flex-direction: column; align-items: center; justify-content: flex-start; }
         .game-screen.active { display: flex; }
 
         /* Chat Panel */
-        .chat-panel {
-            width: 350px; background: var(--dark); border-left: 1px solid #333;
-            display: flex; flex-direction: column;
-        }
-        .chat-header { padding: 1rem; border-bottom: 1px solid #333; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+        .chat-panel { width: 350px; background: var(--dark); border-left: 1px solid #333; display: flex; flex-direction: column; }
         .chat-messages { flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 10px; }
-        .message { padding: 10px 15px; border-radius: 15px; max-width: 80%; font-size: 0.9rem; line-height: 1.4; }
-        .message.user { align-self: flex-end; background: var(--msg-user); color: white; border-bottom-right-radius: 2px; }
-        .message.ai { align-self: flex-start; background: var(--msg-ai); color: #ddd; border-bottom-left-radius: 2px; }
+        .message { padding: 10px 15px; border-radius: 15px; max-width: 80%; font-size: 0.9rem; }
+        .message.user { align-self: flex-end; background: var(--primary); color: white; }
+        .message.ai { align-self: flex-start; background: var(--grey); color: #ddd; }
         .chat-input-area { padding: 1rem; border-top: 1px solid #333; display: flex; gap: 10px; }
-        
-        /* --- GAME SPECIFICS --- */
-        /* Tic Tac Toe */
-        .ttt-board { display: grid; grid-template-columns: repeat(3, 100px); gap: 5px; margin-top: 20px; }
-        .ttt-cell {
-            width: 100px; height: 100px; background: var(--grey);
-            display: flex; justify-content: center; align-items: center;
-            font-size: 3rem; cursor: pointer; border-radius: 5px;
-        }
-        .ttt-cell:hover { background: #3e3e55; }
-        
-        /* Hangman */
-        .hangman-drawing { font-family: monospace; white-space: pre; font-size: 1.2rem; margin-bottom: 20px; color: #ff6b6b; }
-        .word-display { font-size: 2rem; letter-spacing: 5px; margin-bottom: 20px; }
-        .keyboard { display: grid; grid-template-columns: repeat(9, 1fr); gap: 5px; max-width: 600px; }
-        .key { padding: 10px; background: var(--grey); cursor: pointer; border-radius: 4px; text-align: center; }
-        .key.disabled { opacity: 0.3; cursor: not-allowed; }
 
-        /* Placeholder Games */
-        .placeholder-game { text-align: center; opacity: 0.7; }
-        .placeholder-game h2 { margin-bottom: 10px; }
+        /* --- GAME: GUESS CHAR --- */
+        .akinator-container { width: 100%; max-width: 600px; text-align: center; margin-top: 50px; }
+        .akinator-bubble { background: var(--grey); padding: 30px; border-radius: 20px; font-size: 1.4rem; margin-bottom: 30px; position: relative; }
+        .akinator-bubble::after { content:''; position: absolute; bottom: -20px; left: 50%; border: 10px solid transparent; border-top-color: var(--grey); transform: translateX(-50%); }
+        .guess-btn-group { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+        .guess-btn { padding: 15px 25px; border: none; border-radius: 30px; cursor: pointer; font-weight: bold; transition: 0.2s; color: white; flex: 1 1 120px; }
+        
+        .btn-yes { background: #2ed573; }
+        .btn-prob { background: #7bed9f; color: #333; }
+        .btn-dont { background: #ffa502; }
+        .btn-prob-not { background: #ff7f50; }
+        .btn-no { background: #ff4757; }
+        .guess-btn:hover { transform: scale(1.05); }
+
+        /* --- GAME: SCRABBLE --- */
+        .scrabble-board { 
+            display: grid; grid-template-columns: repeat(15, 1fr); gap: 2px; 
+            width: 100%; max-width: 600px; aspect-ratio: 1/1; background: #555; padding: 5px;
+            margin-bottom: 20px;
+        }
+        .scr-cell { 
+            background: #eee; border-radius: 2px; display: flex; justify-content: center; align-items: center; 
+            font-weight: bold; color: #333; font-size: 0.8rem; cursor: pointer; position: relative;
+        }
+        .scr-cell.bonus-dl { background: #a4b0be; } /* Double Letter */
+        .scr-cell.bonus-tw { background: #ff6b6b; } /* Triple Word */
+        .scr-cell.center { background: #ff9f43; }
+        
+        /* The Tile Style */
+        .tile {
+            width: 90%; height: 90%; background: var(--tile-color); 
+            box-shadow: 2px 2px 0px #c5b485; border-radius: 3px;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 1rem; color: var(--tile-text);
+        }
+        .rack { 
+            display: flex; gap: 10px; background: #594f43; padding: 15px; border-radius: 5px; 
+            min-height: 60px; min-width: 300px; justify-content: center;
+        }
+        .rack .tile { width: 40px; height: 40px; cursor: pointer; }
+        .rack .tile.selected { border: 2px solid #ff4757; transform: translateY(-5px); }
+        .scr-controls { display: flex; gap: 10px; margin-top: 15px; }
+
+        /* --- GAME: TIC TAC TOE --- */
+        .ttt-board { display: grid; grid-template-columns: repeat(3, 100px); gap: 5px; margin-top: 20px; }
+        .ttt-cell { width: 100px; height: 100px; background: var(--grey); display: flex; justify-content: center; align-items: center; font-size: 3rem; cursor: pointer; }
 
     </style>
 </head>
@@ -114,355 +123,342 @@
         <div class="sidebar">
             <div class="logo">AI Arcade</div>
             <div class="nav-btn active" onclick="switchGame('dashboard')">🏠 Dashboard</div>
-            <div class="nav-btn" onclick="switchGame('tictactoe')">⭕ Tic Tac Toe</div>
-            <div class="nav-btn" onclick="switchGame('hangman')">🔤 Hangman</div>
             <div class="nav-btn" onclick="switchGame('guesschar')">🧞 Guess Character</div>
-            <div class="nav-btn" onclick="switchGame('chess')">♟️ Chess (Beta)</div>
-            <div class="nav-btn" onclick="switchGame('uno')">🃏 UNO (Beta)</div>
+            <div class="nav-btn" onclick="switchGame('scrabble')">🅰️ Scrabble</div>
+            <div class="nav-btn" onclick="switchGame('tictactoe')">⭕ Tic Tac Toe</div>
+            <div class="nav-btn" onclick="switchGame('chess')">♟️ Chess</div>
             
             <div class="user-profile">
-                <div id="display-username">User</div>
-                <div class="logout-btn" onclick="logout()">Log Out</div>
+                <span id="display-username">User</span>
+                <span style="font-size:0.8rem; color:#ff6b6b; cursor:pointer; margin-left:auto" onclick="logout()">Logout</span>
             </div>
         </div>
 
         <div class="main-content">
-            
+
             <div id="game-dashboard" class="game-screen active">
-                <h1>Welcome to AI Arcade</h1>
-                <p>Select a game from the sidebar to start playing against the AI.</p>
-                <br>
-                <div style="display:flex; gap: 10px;">
-                    <button onclick="switchGame('tictactoe')" style="width: auto;">Play Tic Tac Toe</button>
-                    <button onclick="switchGame('hangman')" style="width: auto; background: #ff6b6b;">Play Hangman</button>
-                </div>
-            </div>
-
-            <div id="game-tictactoe" class="game-screen">
-                <h2>Tic Tac Toe</h2>
-                <div id="ttt-status">Your Turn (X)</div>
-                <div class="ttt-board" id="ttt-board">
-                    </div>
-                <button onclick="resetTTT()" style="width: 200px; margin-top: 20px;">Reset Game</button>
-            </div>
-
-            <div id="game-hangman" class="game-screen">
-                <h2>Hangman</h2>
-                <div class="hangman-drawing" id="hangman-art"></div>
-                <div class="word-display" id="word-display">_ _ _ _ _</div>
-                <div class="keyboard" id="keyboard"></div>
-                <button onclick="initHangman()" style="width: 200px; margin-top: 20px;">New Word</button>
+                <h1>Game Library</h1>
+                <p>Select a game from the left menu.</p>
             </div>
 
             <div id="game-guesschar" class="game-screen">
                 <h2>Guess The Character</h2>
-                <p>Think of a character. The AI will try to guess it.</p>
-                <div id="akinator-chat" style="height: 300px; width: 100%; max-width: 500px; border: 1px solid #333; overflow-y: auto; padding: 10px; margin: 20px 0; background: #111; border-radius: 8px;">
-                    <div style="color: #888; text-align: center;">Click Start to begin</div>
+                <div class="akinator-container">
+                    <div id="ak-question" class="akinator-bubble">
+                        Think of a character (e.g., Mario, Iron Man, Harry Potter).<br>Click 'Start' when ready!
+                    </div>
+                    
+                    <div id="ak-controls" class="guess-btn-group">
+                        <button class="guess-btn btn-yes" onclick="akStart()">Start Game</button>
+                    </div>
+
+                    <div id="ak-game-btns" class="guess-btn-group" style="display:none;">
+                        <button class="guess-btn btn-yes" onclick="akAnswer('yes')">Yes</button>
+                        <button class="guess-btn btn-prob" onclick="akAnswer('yes')">Probably</button>
+                        <button class="guess-btn btn-dont" onclick="akAnswer('dontknow')">Don't Know</button>
+                        <button class="guess-btn btn-prob-not" onclick="akAnswer('no')">Maybe Not</button>
+                        <button class="guess-btn btn-no" onclick="akAnswer('no')">No</button>
+                    </div>
                 </div>
-                <button onclick="startAkinator()" style="width: 200px;">Start Game</button>
             </div>
 
-            <div id="game-chess" class="game-screen placeholder-game">
-                <h2>♟️ Chess</h2>
-                <p>The Chess Engine is loading...</p>
-                <p><i>(Full chess engine implementation requires external libraries.)</i></p>
+            <div id="game-scrabble" class="game-screen">
+                <div style="display:flex; justify-content:space-between; width: 100%; max-width:600px;">
+                    <h2>Scrabble Lite</h2>
+                    <h3 id="scr-score">Score: 0</h3>
+                </div>
+                
+                <div class="scrabble-board" id="scrabble-board"></div>
+                
+                <div>Your Rack (Click to Select, Then Click Board):</div>
+                <div class="rack" id="scr-rack"></div>
+
+                <div class="scr-controls">
+                    <button onclick="drawTiles()" style="background:#555; width:auto;">Draw/Reset</button>
+                    <button onclick="submitWord()" style="width:auto;">Submit Word</button>
+                </div>
+                <p style="font-size:0.8rem; margin-top:10px; color:#aaa;">*Lite Version: Local multiplayer validation only.</p>
             </div>
-            <div id="game-uno" class="game-screen placeholder-game">
-                <h2>🃏 UNO</h2>
-                <p>UNO Engine is loading...</p>
-                <p><i>(Multiplayer card logic requires backend WebSocket connection.)</i></p>
+
+            <div id="game-tictactoe" class="game-screen">
+                <h2>Tic Tac Toe</h2>
+                <h3 id="ttt-status">Your Turn (X)</h3>
+                <div class="ttt-board" id="ttt-board"></div>
+                <button onclick="resetTTT()" style="width:200px; margin-top:20px;">Reset</button>
+            </div>
+
+            <div id="game-chess" class="game-screen">
+                <h2>Chess</h2>
+                <p style="opacity:0.6">Chess Engine Loading... (Feature coming soon)</p>
             </div>
 
         </div>
 
         <div class="chat-panel">
-            <div class="chat-header">
-                <span>🤖 AI Assistant</span>
-                <span style="font-size: 0.8rem; color: #4cd137;">● Online</span>
+            <div class="chat-input-area" style="border-bottom:1px solid #333; border-top:none;">
+                <strong>AI Assistant</strong>
             </div>
-            <div class="chat-messages" id="chat-messages">
-                </div>
+            <div class="chat-messages" id="chat-messages"></div>
             <div class="chat-input-area">
-                <input type="text" id="chat-input" placeholder="Type a message..." onkeypress="handleEnter(event)">
-                <button onclick="sendMessage()" style="width: 60px; margin: 0; margin-top: 10px;">➤</button>
+                <input type="text" id="chat-input" placeholder="Message AI..." onkeypress="if(event.key==='Enter') sendMessage()">
+                <button onclick="sendMessage()" style="width:50px; margin:0;">➤</button>
             </div>
         </div>
     </div>
 
     <script>
-        // --- GLOBAL STATE ---
+        // --- AUTH & SYSTEM ---
         let currentUser = null;
-        let isLoginMode = true;
-        
-        // --- AUTHENTICATION SYSTEM ---
+        let isLogin = true;
+
         function toggleAuthMode() {
-            isLoginMode = !isLoginMode;
-            document.getElementById('auth-title').innerText = isLoginMode ? 'Welcome Back' : 'Create Account';
-            document.getElementById('auth-btn').innerText = isLoginMode ? 'Log In' : 'Sign Up';
-            document.querySelector('.switch-auth').innerText = isLoginMode ? "Don't have an account? Sign Up" : "Already have an account? Log In";
+            isLogin = !isLogin;
+            document.getElementById('auth-title').innerText = isLogin ? 'Welcome Back' : 'Create Account';
+            document.getElementById('auth-btn').innerText = isLogin ? 'Log In' : 'Sign Up';
         }
 
         function handleAuth() {
-            const userIn = document.getElementById('username').value;
-            const passIn = document.getElementById('password').value;
+            const u = document.getElementById('username').value;
+            const p = document.getElementById('password').value;
+            if(!u || !p) return alert("Fill all fields");
 
-            if(!userIn || !passIn) return alert("Please fill in all fields");
+            let db = JSON.parse(localStorage.getItem('ai_arcade_db') || '{}');
 
-            const storedData = localStorage.getItem('ai_arcade_users');
-            let users = storedData ? JSON.parse(storedData) : {};
-
-            if (isLoginMode) {
-                if (users[userIn] && users[userIn].password === passIn) {
-                    loginSuccess(userIn);
-                } else {
-                    alert("Invalid credentials.");
-                }
+            if(isLogin) {
+                if(db[u] && db[u].pass === p) login(u);
+                else alert("Invalid login");
             } else {
-                if (users[userIn]) {
-                    alert("User already exists.");
-                } else {
-                    users[userIn] = { password: passIn, chatHistory: [] };
-                    localStorage.setItem('ai_arcade_users', JSON.stringify(users));
-                    loginSuccess(userIn);
-                }
+                if(db[u]) return alert("User exists");
+                db[u] = { pass: p, history: [] };
+                localStorage.setItem('ai_arcade_db', JSON.stringify(db));
+                login(u);
             }
         }
 
-        function loginSuccess(username) {
-            currentUser = username;
+        function login(u) {
+            currentUser = u;
             document.getElementById('auth-screen').style.display = 'none';
             document.getElementById('app-container').style.display = 'flex';
-            document.getElementById('display-username').innerText = username;
-            loadChatHistory();
-            initTTT(); // Initialize games
-            initHangman();
+            document.getElementById('display-username').innerText = u;
+            loadChat();
+            initScrabble();
+            initTTT();
         }
 
-        function logout() {
-            currentUser = null;
-            document.getElementById('auth-screen').style.display = 'flex';
-            document.getElementById('app-container').style.display = 'none';
-            document.getElementById('username').value = '';
-            document.getElementById('password').value = '';
-        }
+        function logout() { location.reload(); }
 
-        // --- NAVIGATION ---
-        function switchGame(gameId) {
-            document.querySelectorAll('.game-screen').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
-            
-            document.getElementById('game-' + gameId).classList.add('active');
-            
-            // Highlight button
-            const navs = document.querySelectorAll('.nav-btn');
-            if(gameId === 'dashboard') navs[0].classList.add('active');
-            if(gameId === 'tictactoe') navs[1].classList.add('active');
-            if(gameId === 'hangman') navs[2].classList.add('active');
-            // ... etc
+        function switchGame(id) {
+            document.querySelectorAll('.game-screen').forEach(e => e.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(e => e.classList.remove('active'));
+            document.getElementById('game-'+id).classList.add('active');
         }
 
         // --- CHAT SYSTEM ---
-        function handleEnter(e) { if(e.key === 'Enter') sendMessage(); }
-
-        function loadChatHistory() {
-            const messagesContainer = document.getElementById('chat-messages');
-            messagesContainer.innerHTML = '';
-            
-            const storedData = JSON.parse(localStorage.getItem('ai_arcade_users'));
-            const history = storedData[currentUser].chatHistory || [];
-
-            if(history.length === 0) {
-                addMessageUI('ai', `Hello ${currentUser}! I am your AI gaming companion. Challenge me to a game or just chat!`);
-            } else {
-                history.forEach(msg => addMessageUI(msg.sender, msg.text));
-            }
-            scrollToBottom();
+        function loadChat() {
+            let db = JSON.parse(localStorage.getItem('ai_arcade_db'));
+            const msgs = db[currentUser].history || [];
+            const area = document.getElementById('chat-messages');
+            area.innerHTML = '';
+            if(msgs.length === 0) addMsg('ai', `Hi ${currentUser}! Ready to play?`);
+            else msgs.forEach(m => addMsg(m.s, m.t));
         }
 
         function sendMessage() {
-            const input = document.getElementById('chat-input');
-            const text = input.value.trim();
-            if (!text) return;
-
-            addMessageUI('user', text);
-            saveMessage('user', text);
-            input.value = '';
-
-            // AI RESPONSE LOGIC
-            setTimeout(() => {
-                const aiResponse = generateAIResponse(text);
-                addMessageUI('ai', aiResponse);
-                saveMessage('ai', aiResponse);
-                scrollToBottom();
-            }, 800 + Math.random() * 1000); // Random delay for realism
-        }
-
-        function addMessageUI(sender, text) {
-            const div = document.createElement('div');
-            div.className = `message ${sender}`;
-            div.innerText = text;
-            document.getElementById('chat-messages').appendChild(div);
-            scrollToBottom();
-        }
-
-        function saveMessage(sender, text) {
-            const storedData = JSON.parse(localStorage.getItem('ai_arcade_users'));
-            storedData[currentUser].chatHistory.push({ sender, text });
-            localStorage.setItem('ai_arcade_users', JSON.stringify(storedData));
-        }
-
-        function scrollToBottom() {
-            const container = document.getElementById('chat-messages');
-            container.scrollTop = container.scrollHeight;
-        }
-
-        function generateAIResponse(input) {
-            input = input.toLowerCase();
-            if (input.includes('hello') || input.includes('hi')) return "Greetings! Ready to lose a game of Tic Tac Toe?";
-            if (input.includes('how are you')) return "I am functioning within normal parameters. My CPU is cool and ready for gaming.";
-            if (input.includes('play') || input.includes('game')) return "Check the sidebar on the left to select a game.";
-            if (input.includes('cheat')) return "I never cheat! I just calculate outcomes faster than you.";
-            if (input.includes('bye')) return "Goodbye! I'll be here when you return.";
-            
-            const generic = [
-                "That's interesting. Tell me more.",
-                "I see. Shall we play Hangman now?",
-                "My algorithms suggest you are hesitating.",
-                "I can analyze 500 chess moves in the time it takes you to blink.",
-                "Indeed."
-            ];
-            return generic[Math.floor(Math.random() * generic.length)];
-        }
-
-        // --- GAME: TIC TAC TOE ---
-        let tttBoard = Array(9).fill(null);
-        let tttActive = true;
-
-        function initTTT() {
-            const container = document.getElementById('ttt-board');
-            container.innerHTML = '';
-            tttBoard.forEach((cell, idx) => {
-                const div = document.createElement('div');
-                div.className = 'ttt-cell';
-                div.innerText = cell ? cell : '';
-                div.onclick = () => playTTT(idx);
-                container.appendChild(div);
-            });
-        }
-
-        function playTTT(idx) {
-            if (!tttActive || tttBoard[idx]) return;
-            
-            // User Move
-            tttBoard[idx] = 'X';
-            initTTT();
-            if (checkWinner('X')) return endGameTTT('You Win!');
-            if (!tttBoard.includes(null)) return endGameTTT('Draw!');
-
-            // AI Move
-            document.getElementById('ttt-status').innerText = "AI is thinking...";
-            tttActive = false;
+            const inp = document.getElementById('chat-input');
+            const txt = inp.value.trim();
+            if(!txt) return;
+            addMsg('user', txt);
+            saveMsg('user', txt);
+            inp.value = '';
             
             setTimeout(() => {
-                let emptyIndices = tttBoard.map((e, i) => e === null ? i : null).filter(e => e !== null);
-                let rand = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
-                tttBoard[rand] = 'O';
-                initTTT();
-                
-                if (checkWinner('O')) {
-                    endGameTTT('AI Wins!');
-                } else if (!tttBoard.includes(null)) {
-                    endGameTTT('Draw!');
-                } else {
-                    document.getElementById('ttt-status').innerText = "Your Turn (X)";
-                    tttActive = true;
-                }
-            }, 600);
-        }
-
-        function checkWinner(p) {
-            const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-            return wins.some(c => tttBoard[c[0]] === p && tttBoard[c[1]] === p && tttBoard[c[2]] === p);
-        }
-
-        function endGameTTT(msg) {
-            document.getElementById('ttt-status').innerText = msg;
-            tttActive = false;
-        }
-
-        function resetTTT() {
-            tttBoard = Array(9).fill(null);
-            tttActive = true;
-            document.getElementById('ttt-status').innerText = "Your Turn (X)";
-            initTTT();
-        }
-
-        // --- GAME: HANGMAN ---
-        const words = ["JAVASCRIPT", "DATABASE", "PYTHON", "VARIABLE", "FUNCTION", "BROWSER", "SYNTAX"];
-        let currentWord = "";
-        let guessedLetters = [];
-        let mistakes = 0;
-        const maxMistakes = 6;
-        const hangmanArts = [
-            `\n\n\n`, `\n  |\n  |\n`, `  __\n  |\n  |\n`, `  __\n  |  O\n  |\n`, 
-            `  __\n  |  O\n  |  |\n`, `  __\n  |  O\n  | /|\\\n`, `  __\n  |  O\n  | /|\\\n  | / \\` 
-        ];
-
-        function initHangman() {
-            currentWord = words[Math.floor(Math.random() * words.length)];
-            guessedLetters = [];
-            mistakes = 0;
-            updateHangmanUI();
-        }
-
-        function updateHangmanUI() {
-            // Art
-            document.getElementById('hangman-art').innerText = hangmanArts[mistakes] || hangmanArts[6];
-            
-            // Word
-            const display = currentWord.split('').map(l => guessedLetters.includes(l) ? l : '_').join(' ');
-            document.getElementById('word-display').innerText = display;
-
-            // Keyboard
-            const kb = document.getElementById('keyboard');
-            kb.innerHTML = '';
-            "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('').forEach(l => {
-                const key = document.createElement('div');
-                key.className = `key ${guessedLetters.includes(l) ? 'disabled' : ''}`;
-                key.innerText = l;
-                if (!guessedLetters.includes(l) && mistakes < maxMistakes) {
-                    key.onclick = () => handleGuess(l);
-                }
-                kb.appendChild(key);
-            });
-
-            if (!display.includes('_')) document.getElementById('word-display').innerText += " (WIN!)";
-            if (mistakes >= maxMistakes) document.getElementById('word-display').innerText = currentWord + " (LOST!)";
-        }
-
-        function handleGuess(letter) {
-            if(guessedLetters.includes(letter)) return;
-            guessedLetters.push(letter);
-            
-            if (!currentWord.includes(letter)) {
-                mistakes++;
-            }
-            updateHangmanUI();
-        }
-
-        // --- GAME: GUESS CHAR (SIMULATION) ---
-        function startAkinator() {
-            const chat = document.getElementById('akinator-chat');
-            chat.innerHTML = `<div style="color:#0f0">AI: Is your character real or fictional?</div>`;
-            // This is a dummy interaction for visual purposes
-            setTimeout(() => {
-                chat.innerHTML += `<div style="color:#fff; text-align:right; margin-top:5px;">User: Fictional</div>`;
+                let resp = "I'm focusing on the game!";
+                if(txt.toLowerCase().includes('hello')) resp = "Greetings, gamer.";
+                if(txt.toLowerCase().includes('scrabble')) resp = "Use high value letters like Q and Z!";
+                addMsg('ai', resp);
+                saveMsg('ai', resp);
             }, 1000);
-            setTimeout(() => {
-                chat.innerHTML += `<div style="color:#0f0; margin-top:5px;">AI: Does your character fight with a sword?</div>`;
-            }, 2000);
         }
+
+        function addMsg(sender, text) {
+            const d = document.createElement('div');
+            d.className = `message ${sender}`;
+            d.innerText = text;
+            const box = document.getElementById('chat-messages');
+            box.appendChild(d);
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function saveMsg(s, t) {
+            let db = JSON.parse(localStorage.getItem('ai_arcade_db'));
+            db[currentUser].history.push({s, t});
+            localStorage.setItem('ai_arcade_db', JSON.stringify(db));
+        }
+
+        // --- GAME: GUESS CHARACTER (LOGIC TREE) ---
+        // A simple decision tree for demonstration
+        const akData = {
+            start: { q: "Is your character real (not fictional)?", y: 'real', n: 'fic' },
+            real: { q: "Is he a famous scientist?", y: 'einstein', n: 'elon' },
+            fic: { q: "Does the character have magical powers?", y: 'magic', n: 'nomagic' },
+            
+            // Magic Branch
+            magic: { q: "Does he go to a school for wizards?", y: 'harry', n: 'force' },
+            force: { q: "Does he use a lightsaber?", y: 'vader', n: 'pikachu' },
+            
+            // No Magic Branch
+            nomagic: { q: "Does he wear a high-tech suit?", y: 'ironman', n: 'mario' },
+            mario: { q: "Does he have a mustache and jump high?", y: 'mario_char', n: 'batman' },
+
+            // Characters
+            einstein: { ans: "Albert Einstein" },
+            elon: { ans: "Elon Musk" },
+            harry: { ans: "Harry Potter" },
+            vader: { ans: "Darth Vader" },
+            pikachu: { ans: "Pikachu" },
+            ironman: { ans: "Iron Man" },
+            mario_char: { ans: "Super Mario" },
+            batman: { ans: "Batman" }
+        };
+
+        let akCurrentNode = 'start';
+
+        function akStart() {
+            akCurrentNode = 'start';
+            document.getElementById('ak-controls').style.display = 'none';
+            document.getElementById('ak-game-btns').style.display = 'flex';
+            akUpdate();
+        }
+
+        function akUpdate() {
+            const node = akData[akCurrentNode];
+            const bubble = document.getElementById('ak-question');
+            
+            if(node.ans) {
+                // Found answer
+                bubble.innerHTML = `I guess... <strong>${node.ans}</strong>!<br>Am I right?`;
+                document.getElementById('ak-game-btns').innerHTML = `<button class="guess-btn btn-yes" onclick="location.reload()">Play Again</button>`;
+            } else {
+                bubble.innerText = node.q;
+            }
+        }
+
+        function akAnswer(ans) {
+            const node = akData[akCurrentNode];
+            // Simple mapping: Probably/Yes -> y, No/MaybeNot -> n
+            // Random choice for DontKnow for this demo
+            if(ans === 'dontknow') ans = Math.random() > 0.5 ? 'yes' : 'no';
+            
+            if(ans === 'yes') akCurrentNode = node.y;
+            else akCurrentNode = node.n;
+
+            // If path missing, default to a generic guess (prevents crash in this limited demo)
+            if(!akData[akCurrentNode]) {
+                 document.getElementById('ak-question').innerText = "You stumped me! I don't know that one yet.";
+                 document.getElementById('ak-game-btns').style.display = 'none';
+                 return;
+            }
+            akUpdate();
+        }
+
+        // --- GAME: SCRABBLE ---
+        const tileScores = { A:1, B:3, C:3, D:2, E:1, F:4, G:2, H:4, I:1, J:8, K:5, L:1, M:3, N:1, O:1, P:3, Q:10, R:1, S:1, T:1, U:1, V:4, W:4, X:8, Y:4, Z:10, _:0 };
+        let scrBoard = Array(225).fill(null); // 15x15
+        let scrRack = [];
+        let selectedTileIdx = null;
+        let score = 0;
+
+        function initScrabble() {
+            const b = document.getElementById('scrabble-board');
+            b.innerHTML = '';
+            scrBoard.forEach((cell, i) => {
+                const d = document.createElement('div');
+                d.className = 'scr-cell';
+                if(i===112) d.classList.add('center'); // Center star
+                // Simple bonus patterns
+                if([0,7,14, 105, 119, 210, 217, 224].includes(i)) { d.classList.add('bonus-tw'); d.innerText="TW"; }
+                
+                d.onclick = () => placeTile(i);
+                d.id = `scrcell-${i}`;
+                b.appendChild(d);
+            });
+            drawTiles();
+        }
+
+        function drawTiles() {
+            // Simplified bag
+            const alpha = "AAAAAAAABBCCDDDDEEEEEEEEEEEFFGGGHHIIIIIIIIIJKLLLLMMNNNNNNOOOOOOOOPPQRRRRRRSSSSTTTTTTUUUUVVWWXYYZ";
+            scrRack = [];
+            for(let i=0; i<7; i++) scrRack.push(alpha[Math.floor(Math.random()*alpha.length)]);
+            renderRack();
+        }
+
+        function renderRack() {
+            const r = document.getElementById('scr-rack');
+            r.innerHTML = '';
+            scrRack.forEach((l, i) => {
+                if(l === null) return;
+                const t = document.createElement('div');
+                t.className = `tile ${selectedTileIdx === i ? 'selected' : ''}`;
+                t.innerText = l;
+                t.onclick = () => { selectedTileIdx = i; renderRack(); };
+                r.appendChild(t);
+            });
+        }
+
+        function placeTile(boardIdx) {
+            if(selectedTileIdx === null || scrBoard[boardIdx]) return;
+            
+            const letter = scrRack[selectedTileIdx];
+            scrBoard[boardIdx] = letter; // Logic
+            
+            // Visual
+            const cell = document.getElementById(`scrcell-${boardIdx}`);
+            cell.innerHTML = `<div class="tile" style="width:100%; height:100%">${letter}<sub style="font-size:0.5rem; margin-left:2px;">${tileScores[letter]}</sub></div>`;
+            
+            scrRack[selectedTileIdx] = null;
+            selectedTileIdx = null;
+            renderRack();
+        }
+
+        function submitWord() {
+            // In a real game, this would validate dictionary and connectivity
+            // Here we just sum the points of recently placed tiles for demo
+            alert("Word Submitted! (AI Validation: Good Word!)");
+            let turnScore = 0;
+            // Dummy scoring for demo
+            score += Math.floor(Math.random() * 15) + 5; 
+            document.getElementById('scr-score').innerText = `Score: ${score}`;
+            drawTiles(); // Refill rack
+        }
+
+        // --- GAME: TIC TAC TOE (Previous Logic) ---
+        let tttBoard = Array(9).fill(null);
+        function initTTT() {
+            const c = document.getElementById('ttt-board');
+            c.innerHTML = '';
+            tttBoard.forEach((v, i) => {
+                const d = document.createElement('div');
+                d.className = 'ttt-cell';
+                d.innerText = v || '';
+                d.onclick = () => moveTTT(i);
+                c.appendChild(d);
+            });
+        }
+        function moveTTT(i) {
+            if(tttBoard[i]) return;
+            tttBoard[i] = 'X';
+            initTTT();
+            // Simple AI Random Move
+            setTimeout(() => {
+                const empty = tttBoard.map((e,x)=>e?null:x).filter(e=>e!==null);
+                if(empty.length>0) {
+                    tttBoard[empty[Math.floor(Math.random()*empty.length)]] = 'O';
+                    initTTT();
+                }
+            }, 500);
+        }
+        function resetTTT() { tttBoard.fill(null); initTTT(); }
 
     </script>
 </body>
