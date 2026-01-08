@@ -3,107 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Arcade Suite V2</title>
+    <title>AI Arcade Ultimate</title>
     <style>
         :root {
+            /* Dark Mode (Default) */
+            --bg-main: #161625;
+            --bg-panel: #1e1e2f;
             --primary: #6C63FF;
-            --dark: #1e1e2f;
-            --darker: #161625;
-            --light: #f5f6fa;
-            --grey: #2e2e42;
-            --tile-color: #f1dfa5;
-            --tile-text: #333;
+            --text-main: #f5f6fa;
+            --text-sec: #aaa;
+            --border: #333;
+            --hover: #2e2e42;
+            --chat-user: #6C63FF;
+            --chat-ai: #2e2e42;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        
-        body { background-color: var(--darker); color: var(--light); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+        body.light-mode {
+            --bg-main: #f0f2f5;
+            --bg-panel: #ffffff;
+            --primary: #4834d4;
+            --text-main: #2d3436;
+            --text-sec: #636e72;
+            --border: #dfe6e9;
+            --hover: #f1f2f6;
+            --chat-user: #4834d4;
+            --chat-ai: #dfe6e9;
+        }
 
-        /* --- AUTH SCREEN --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; transition: background 0.3s, color 0.3s; }
+        body { background-color: var(--bg-main); color: var(--text-main); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+        /* --- AUTH --- */
         #auth-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--darker); z-index: 100; display: flex;
+            background: var(--bg-main); z-index: 100; display: flex;
             justify-content: center; align-items: center; flex-direction: column;
         }
         .auth-box {
-            background: var(--dark); padding: 2rem; border-radius: 10px;
-            width: 350px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center;
+            background: var(--bg-panel); padding: 2rem; border-radius: 10px;
+            width: 350px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); text-align: center; border: 1px solid var(--border);
         }
-        input { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #444; background: var(--darker); color: white; }
+        input { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid var(--border); background: var(--bg-main); color: var(--text-main); }
         button {
             width: 100%; padding: 10px; background: var(--primary); color: white;
             border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 10px;
         }
-        button:hover { filter: brightness(1.1); }
-        .switch-auth { margin-top: 15px; font-size: 0.9rem; cursor: pointer; color: #aaa; text-decoration: underline; }
+        button:hover { opacity: 0.9; }
+        .beta-tag { font-size: 0.7rem; color: #ff6b6b; margin-top: 5px; letter-spacing: 1px; font-weight: bold; }
 
         /* --- LAYOUT --- */
         #app-container { display: none; height: 100vh; width: 100%; flex-direction: row; }
+        .sidebar { width: 260px; background: var(--bg-panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 1rem; overflow-y: auto; }
+        .logo { font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem; color: var(--primary); display: flex; align-items: center; gap: 10px; }
         
-        .sidebar { width: 250px; background: var(--dark); border-right: 1px solid #333; display: flex; flex-direction: column; padding: 1rem; }
-        .logo { font-size: 1.5rem; font-weight: bold; margin-bottom: 2rem; color: var(--primary); }
-        .nav-btn { padding: 12px; margin-bottom: 5px; cursor: pointer; border-radius: 8px; transition: 0.2s; }
-        .nav-btn:hover, .nav-btn.active { background: var(--grey); }
-        .user-profile { margin-top: auto; padding-top: 1rem; border-top: 1px solid #333; display: flex; align-items: center; gap: 10px; }
+        .nav-category { font-size: 0.75rem; color: var(--text-sec); margin-top: 15px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; }
+        .nav-btn { padding: 10px; margin-bottom: 2px; cursor: pointer; border-radius: 6px; font-size: 0.95rem; color: var(--text-main); display: flex; align-items: center; gap: 10px; }
+        .nav-btn:hover, .nav-btn.active { background: var(--hover); }
         
-        .main-content { flex: 1; padding: 2rem; position: relative; overflow-y: auto; background-color: var(--darker); }
-        .game-screen { display: none; height: 100%; flex-direction: column; align-items: center; justify-content: flex-start; }
+        .main-content { flex: 1; padding: 2rem; position: relative; overflow-y: auto; background-color: var(--bg-main); display: flex; justify-content: center; }
+        .game-screen { display: none; width: 100%; max-width: 800px; flex-direction: column; align-items: center; }
         .game-screen.active { display: flex; }
 
-        /* Chat Panel */
-        .chat-panel { width: 350px; background: var(--dark); border-left: 1px solid #333; display: flex; flex-direction: column; }
+        /* --- CHAT --- */
+        .chat-panel { width: 320px; background: var(--bg-panel); border-left: 1px solid var(--border); display: flex; flex-direction: column; }
+        .chat-header { padding: 15px; border-bottom: 1px solid var(--border); font-weight: bold; }
         .chat-messages { flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 10px; }
-        .message { padding: 10px 15px; border-radius: 15px; max-width: 80%; font-size: 0.9rem; }
-        .message.user { align-self: flex-end; background: var(--primary); color: white; }
-        .message.ai { align-self: flex-start; background: var(--grey); color: #ddd; }
-        .chat-input-area { padding: 1rem; border-top: 1px solid #333; display: flex; gap: 10px; }
+        .message { padding: 8px 12px; border-radius: 12px; max-width: 85%; font-size: 0.9rem; }
+        .message.user { align-self: flex-end; background: var(--chat-user); color: white; }
+        .message.ai { align-self: flex-start; background: var(--chat-ai); color: var(--text-main); }
+        .chat-input { padding: 1rem; border-top: 1px solid var(--border); display: flex; gap: 5px; }
 
-        /* --- GAME: GUESS CHAR --- */
-        .akinator-container { width: 100%; max-width: 600px; text-align: center; margin-top: 50px; }
-        .akinator-bubble { background: var(--grey); padding: 30px; border-radius: 20px; font-size: 1.4rem; margin-bottom: 30px; position: relative; }
-        .akinator-bubble::after { content:''; position: absolute; bottom: -20px; left: 50%; border: 10px solid transparent; border-top-color: var(--grey); transform: translateX(-50%); }
-        .guess-btn-group { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
-        .guess-btn { padding: 15px 25px; border: none; border-radius: 30px; cursor: pointer; font-weight: bold; transition: 0.2s; color: white; flex: 1 1 120px; }
+        /* --- SETTINGS --- */
+        .settings-group { width: 100%; max-width: 400px; background: var(--bg-panel); padding: 20px; border-radius: 10px; margin-bottom: 20px; border: 1px solid var(--border); }
+        .setting-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .toggle-switch { position: relative; width: 50px; height: 24px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; border-radius: 34px; transition: .4s; }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 4px; bottom: 4px; background-color: white; border-radius: 50%; transition: .4s; }
+        input:checked + .slider { background-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(26px); }
+
+        /* --- GAME SPECIFICS --- */
+        /* TETRIS */
+        canvas#tetris { border: 2px solid var(--border); background: #000; display: block; }
         
-        .btn-yes { background: #2ed573; }
-        .btn-prob { background: #7bed9f; color: #333; }
-        .btn-dont { background: #ffa502; }
-        .btn-prob-not { background: #ff7f50; }
-        .btn-no { background: #ff4757; }
-        .guess-btn:hover { transform: scale(1.05); }
+        /* MINESWEEPER */
+        .mines-grid { display: grid; gap: 2px; background: #999; border: 5px solid #999; }
+        .mine-cell { width: 30px; height: 30px; background: #c0c0c0; display: flex; justify-content: center; align-items: center; cursor: pointer; font-weight: bold; font-family: monospace; font-size: 1.2rem; }
+        .mine-cell.revealed { background: #e0e0e0; border: 1px solid #ccc; }
+        .mine-cell.bomb { background: #ff4d4d; }
 
-        /* --- GAME: SCRABBLE --- */
-        .scrabble-board { 
-            display: grid; grid-template-columns: repeat(15, 1fr); gap: 2px; 
-            width: 100%; max-width: 600px; aspect-ratio: 1/1; background: #555; padding: 5px;
-            margin-bottom: 20px;
-        }
-        .scr-cell { 
-            background: #eee; border-radius: 2px; display: flex; justify-content: center; align-items: center; 
-            font-weight: bold; color: #333; font-size: 0.8rem; cursor: pointer; position: relative;
-        }
-        .scr-cell.bonus-dl { background: #a4b0be; } /* Double Letter */
-        .scr-cell.bonus-tw { background: #ff6b6b; } /* Triple Word */
-        .scr-cell.center { background: #ff9f43; }
-        
-        /* The Tile Style */
-        .tile {
-            width: 90%; height: 90%; background: var(--tile-color); 
-            box-shadow: 2px 2px 0px #c5b485; border-radius: 3px;
-            display: flex; justify-content: center; align-items: center;
-            font-size: 1rem; color: var(--tile-text);
-        }
-        .rack { 
-            display: flex; gap: 10px; background: #594f43; padding: 15px; border-radius: 5px; 
-            min-height: 60px; min-width: 300px; justify-content: center;
-        }
-        .rack .tile { width: 40px; height: 40px; cursor: pointer; }
-        .rack .tile.selected { border: 2px solid #ff4757; transform: translateY(-5px); }
-        .scr-controls { display: flex; gap: 10px; margin-top: 15px; }
+        /* AKINATOR */
+        .ak-bubble { background: var(--bg-panel); padding: 30px; border-radius: 20px; font-size: 1.2rem; text-align: center; border: 1px solid var(--border); margin-bottom: 20px; }
+        .ak-btn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; }
 
-        /* --- GAME: TIC TAC TOE --- */
-        .ttt-board { display: grid; grid-template-columns: repeat(3, 100px); gap: 5px; margin-top: 20px; }
-        .ttt-cell { width: 100px; height: 100px; background: var(--grey); display: flex; justify-content: center; align-items: center; font-size: 3rem; cursor: pointer; }
+        /* SCRABBLE & TTT */
+        .scr-board { display: grid; grid-template-columns: repeat(15, 1fr); gap: 1px; width: 100%; max-width: 500px; background: #888; aspect-ratio: 1; }
+        .scr-cell { background: #eee; font-size: 0.6rem; display: flex; justify-content: center; align-items: center; cursor: pointer; color: #333; }
+        .ttt-grid { display: grid; grid-template-columns: repeat(3, 100px); gap: 5px; }
+        .ttt-cell { width: 100px; height: 100px; background: var(--bg-panel); border: 1px solid var(--border); font-size: 3rem; display: flex; justify-content: center; align-items: center; cursor: pointer; }
 
     </style>
 </head>
@@ -111,355 +109,564 @@
 
     <div id="auth-screen">
         <div class="auth-box">
-            <h2 id="auth-title">Welcome Back</h2>
+            <h2 id="auth-title">AI Arcade</h2>
             <input type="text" id="username" placeholder="Username">
             <input type="password" id="password" placeholder="Password">
             <button onclick="handleAuth()" id="auth-btn">Log In</button>
-            <p class="switch-auth" onclick="toggleAuthMode()">Don't have an account? Sign Up</p>
+            <div class="beta-tag">STILL IN BETA</div>
+            <p style="margin-top:10px; font-size:0.9rem; cursor:pointer; text-decoration:underline;" onclick="toggleAuthMode()">Switch to Sign Up / Login</p>
         </div>
     </div>
 
     <div id="app-container">
         <div class="sidebar">
-            <div class="logo">AI Arcade</div>
-            <div class="nav-btn active" onclick="switchGame('dashboard')">🏠 Dashboard</div>
-            <div class="nav-btn" onclick="switchGame('guesschar')">🧞 Guess Character</div>
-            <div class="nav-btn" onclick="switchGame('scrabble')">🅰️ Scrabble</div>
-            <div class="nav-btn" onclick="switchGame('tictactoe')">⭕ Tic Tac Toe</div>
-            <div class="nav-btn" onclick="switchGame('chess')">♟️ Chess</div>
+            <div class="logo">👾 AI Arcade</div>
             
-            <div class="user-profile">
-                <span id="display-username">User</span>
-                <span style="font-size:0.8rem; color:#ff6b6b; cursor:pointer; margin-left:auto" onclick="logout()">Logout</span>
+            <div class="nav-btn active" onclick="nav('dashboard')">🏠 Dashboard</div>
+            <div class="nav-btn" onclick="nav('settings')">⚙️ Settings</div>
+
+            <div class="nav-category">Arcade Classics</div>
+            <div class="nav-btn" onclick="nav('tictactoe')">⭕ Tic Tac Toe</div>
+            <div class="nav-btn" onclick="nav('hangman')">🔤 Hangman</div>
+            <div class="nav-btn" onclick="nav('minesweeper')">💣 Minesweeper</div>
+            <div class="nav-btn" onclick="nav('tetris')">🧱 Tetris</div>
+
+            <div class="nav-category">Strategy & Logic</div>
+            <div class="nav-btn" onclick="nav('scrabble')">🅰️ Scrabble</div>
+            <div class="nav-btn" onclick="nav('chess')">♟️ Chess</div>
+            <div class="nav-btn" onclick="nav('guess')">🧞 Guess Character</div>
+            
+            <div class="nav-category">Multiplayer</div>
+            <div class="nav-btn" onclick="nav('uno')">🃏 UNO</div>
+            <div class="nav-btn" onclick="nav('ludo')">🎲 LUDO</div>
+
+            <div style="margin-top: auto; padding-top: 10px; border-top: 1px solid var(--border);">
+                <div class="nav-btn" onclick="logout()" style="color: #ff6b6b;">🚪 Log Out</div>
             </div>
         </div>
 
         <div class="main-content">
 
-            <div id="game-dashboard" class="game-screen active">
-                <h1>Game Library</h1>
-                <p>Select a game from the left menu.</p>
+            <div id="page-dashboard" class="game-screen active">
+                <h1>Welcome Back!</h1>
+                <p>Select a game from the sidebar to begin.</p>
+                <br>
+                <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
+                    <button onclick="nav('tetris')" style="width:150px; background:#e056fd">Play Tetris</button>
+                    <button onclick="nav('guess')" style="width:150px; background:#f0932b">Akinator</button>
+                </div>
             </div>
 
-            <div id="game-guesschar" class="game-screen">
+            <div id="page-settings" class="game-screen">
+                <h2>Settings</h2>
+                <div class="settings-group">
+                    <div class="setting-item">
+                        <span>Light Mode</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="set-lightmode" onchange="toggleLightMode()">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <span>Auto-Logout on Defeat</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="set-autologout" onchange="saveSettings()">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="beta-tag" style="text-align:center">STILL IN BETA</div>
+                </div>
+
+                <div class="settings-group">
+                    <h3>Account</h3>
+                    <input type="password" id="new-pass" placeholder="New Password">
+                    <button onclick="changePassword()">Update Password</button>
+                </div>
+            </div>
+
+            <div id="page-guess" class="game-screen">
                 <h2>Guess The Character</h2>
-                <div class="akinator-container">
-                    <div id="ak-question" class="akinator-bubble">
-                        Think of a character (e.g., Mario, Iron Man, Harry Potter).<br>Click 'Start' when ready!
-                    </div>
-                    
-                    <div id="ak-controls" class="guess-btn-group">
-                        <button class="guess-btn btn-yes" onclick="akStart()">Start Game</button>
-                    </div>
+                <p style="margin-bottom:20px; color:var(--text-sec)">I know Firey (BFDI), Theodore Uris, Holly Wheeler, and many more!</p>
+                <div class="ak-bubble" id="ak-text">Think of a character...</div>
+                <div class="ak-btn-grid" id="ak-controls">
+                    <button onclick="akStart()">Start</button>
+                </div>
+                <div class="ak-btn-grid" id="ak-answers" style="display:none">
+                    <button onclick="akNext('y')" style="background:#2ed573">Yes</button>
+                    <button onclick="akNext('p')" style="background:#7bed9f; color:#333">Probably</button>
+                    <button onclick="akNext('dk')" style="background:#ffa502">Don't Know</button>
+                    <button onclick="akNext('pn')" style="background:#ff7f50">Probably Not</button>
+                    <button onclick="akNext('n')" style="background:#ff4757">No</button>
+                </div>
+            </div>
 
-                    <div id="ak-game-btns" class="guess-btn-group" style="display:none;">
-                        <button class="guess-btn btn-yes" onclick="akAnswer('yes')">Yes</button>
-                        <button class="guess-btn btn-prob" onclick="akAnswer('yes')">Probably</button>
-                        <button class="guess-btn btn-dont" onclick="akAnswer('dontknow')">Don't Know</button>
-                        <button class="guess-btn btn-prob-not" onclick="akAnswer('no')">Maybe Not</button>
-                        <button class="guess-btn btn-no" onclick="akAnswer('no')">No</button>
+            <div id="page-tetris" class="game-screen">
+                <h2>Tetris</h2>
+                <div style="display:flex; gap:20px; align-items: flex-start;">
+                    <canvas id="tetris" width="240" height="400"></canvas>
+                    <div>
+                        <h3>Score: <span id="tetris-score">0</span></h3>
+                        <p style="font-size:0.8rem; margin-top:10px;">Controls:<br>← → : Move<br>↑ : Rotate<br>↓ : Drop</p>
+                        <button onclick="startTetris()">New Game</button>
                     </div>
                 </div>
             </div>
 
-            <div id="game-scrabble" class="game-screen">
-                <div style="display:flex; justify-content:space-between; width: 100%; max-width:600px;">
-                    <h2>Scrabble Lite</h2>
-                    <h3 id="scr-score">Score: 0</h3>
-                </div>
-                
-                <div class="scrabble-board" id="scrabble-board"></div>
-                
-                <div>Your Rack (Click to Select, Then Click Board):</div>
-                <div class="rack" id="scr-rack"></div>
-
-                <div class="scr-controls">
-                    <button onclick="drawTiles()" style="background:#555; width:auto;">Draw/Reset</button>
-                    <button onclick="submitWord()" style="width:auto;">Submit Word</button>
-                </div>
-                <p style="font-size:0.8rem; margin-top:10px; color:#aaa;">*Lite Version: Local multiplayer validation only.</p>
+            <div id="page-minesweeper" class="game-screen">
+                <h2>Minesweeper</h2>
+                <div style="margin-bottom:10px;">Flags: <span id="mine-flags">0</span> | Time: <span id="mine-time">0</span></div>
+                <div id="mines-board" class="mines-grid"></div>
+                <button onclick="initMines(10, 10, 10)" style="width:200px; margin-top:20px;">Reset (Easy)</button>
             </div>
 
-            <div id="game-tictactoe" class="game-screen">
+            <div id="page-tictactoe" class="game-screen">
                 <h2>Tic Tac Toe</h2>
-                <h3 id="ttt-status">Your Turn (X)</h3>
-                <div class="ttt-board" id="ttt-board"></div>
-                <button onclick="resetTTT()" style="width:200px; margin-top:20px;">Reset</button>
+                <h3 id="ttt-msg">Your Turn</h3>
+                <div class="ttt-grid" id="ttt-board"></div>
+                <button onclick="initTTT()" style="width:200px; margin-top:20px">Reset</button>
             </div>
 
-            <div id="game-chess" class="game-screen">
-                <h2>Chess</h2>
-                <p style="opacity:0.6">Chess Engine Loading... (Feature coming soon)</p>
+            <div id="page-chess" class="game-screen">
+                <h2>♟️ Chess</h2>
+                <div class="settings-group" style="text-align:center">
+                    <p>Stockfish Engine Loading...</p>
+                    <div class="beta-tag">STILL IN BETA</div>
+                    <p><i>(Full chess logic requires external API in this version)</i></p>
+                </div>
+            </div>
+
+            <div id="page-uno" class="game-screen">
+                <h2>🃏 UNO</h2>
+                <div class="settings-group" style="text-align:center">
+                    <p>Waiting for players...</p>
+                    <div class="beta-tag">STILL IN BETA</div>
+                </div>
+            </div>
+             <div id="page-ludo" class="game-screen">
+                <h2>🎲 LUDO</h2>
+                <div class="settings-group" style="text-align:center">
+                    <p>Ludo Board Loading...</p>
+                    <div class="beta-tag">STILL IN BETA</div>
+                </div>
+            </div>
+             <div id="page-scrabble" class="game-screen">
+                <h2>🅰️ Scrabble</h2>
+                 <div class="settings-group" style="text-align:center">
+                    <p>Scrabble Dictionary Loading...</p>
+                    <div class="beta-tag">STILL IN BETA</div>
+                </div>
+            </div>
+            
+             <div id="page-hangman" class="game-screen">
+                <h2>🔤 Hangman</h2>
+                 <div class="settings-group" style="text-align:center">
+                    <p>Word Database Loading...</p>
+                    <div class="beta-tag">STILL IN BETA</div>
+                </div>
             </div>
 
         </div>
 
         <div class="chat-panel">
-            <div class="chat-input-area" style="border-bottom:1px solid #333; border-top:none;">
-                <strong>AI Assistant</strong>
-            </div>
-            <div class="chat-messages" id="chat-messages"></div>
-            <div class="chat-input-area">
-                <input type="text" id="chat-input" placeholder="Message AI..." onkeypress="if(event.key==='Enter') sendMessage()">
-                <button onclick="sendMessage()" style="width:50px; margin:0;">➤</button>
+            <div class="chat-header">AI Companion 🤖</div>
+            <div class="chat-messages" id="chat-box"></div>
+            <div class="chat-input">
+                <input type="text" id="chat-msg" placeholder="Type here..." onkeypress="if(event.key==='Enter') sendMsg()">
+                <button onclick="sendMsg()" style="width:50px; margin:0">➤</button>
             </div>
         </div>
     </div>
 
     <script>
-        // --- AUTH & SYSTEM ---
-        let currentUser = null;
+        // --- GLOBAL STATE ---
+        let user = null;
         let isLogin = true;
+        let settings = { lightMode: false, autoLogout: false };
 
+        // --- AUTH & SETTINGS ---
         function toggleAuthMode() {
             isLogin = !isLogin;
-            document.getElementById('auth-title').innerText = isLogin ? 'Welcome Back' : 'Create Account';
             document.getElementById('auth-btn').innerText = isLogin ? 'Log In' : 'Sign Up';
         }
 
         function handleAuth() {
             const u = document.getElementById('username').value;
             const p = document.getElementById('password').value;
-            if(!u || !p) return alert("Fill all fields");
+            if(!u || !p) return alert("Please enter details");
 
-            let db = JSON.parse(localStorage.getItem('ai_arcade_db') || '{}');
+            let db = JSON.parse(localStorage.getItem('arcade_db') || '{}');
 
             if(isLogin) {
-                if(db[u] && db[u].pass === p) login(u);
-                else alert("Invalid login");
+                if(db[u] && db[u].pass === p) loginSuccess(u, db[u]);
+                else alert("Invalid credentials");
             } else {
                 if(db[u]) return alert("User exists");
-                db[u] = { pass: p, history: [] };
-                localStorage.setItem('ai_arcade_db', JSON.stringify(db));
-                login(u);
+                db[u] = { pass: p, settings: { lightMode: false, autoLogout: false } };
+                localStorage.setItem('arcade_db', JSON.stringify(db));
+                loginSuccess(u, db[u]);
             }
         }
 
-        function login(u) {
-            currentUser = u;
+        function loginSuccess(u, data) {
+            user = u;
+            settings = data.settings || { lightMode: false, autoLogout: false };
+            
+            // Apply Settings
+            document.getElementById('set-lightmode').checked = settings.lightMode;
+            document.getElementById('set-autologout').checked = settings.autoLogout;
+            if(settings.lightMode) document.body.classList.add('light-mode');
+            else document.body.classList.remove('light-mode');
+
             document.getElementById('auth-screen').style.display = 'none';
             document.getElementById('app-container').style.display = 'flex';
-            document.getElementById('display-username').innerText = u;
-            loadChat();
-            initScrabble();
-            initTTT();
+            
+            addChat('ai', `Welcome back, ${user}! Ready to play?`);
+        }
+
+        function saveSettings() {
+            settings.lightMode = document.getElementById('set-lightmode').checked;
+            settings.autoLogout = document.getElementById('set-autologout').checked;
+            
+            let db = JSON.parse(localStorage.getItem('arcade_db'));
+            if(db[user]) {
+                db[user].settings = settings;
+                localStorage.setItem('arcade_db', JSON.stringify(db));
+            }
+        }
+
+        function toggleLightMode() {
+            document.body.classList.toggle('light-mode');
+            saveSettings();
+        }
+
+        function changePassword() {
+            const newP = document.getElementById('new-pass').value;
+            if(!newP) return;
+            let db = JSON.parse(localStorage.getItem('arcade_db'));
+            db[user].pass = newP;
+            localStorage.setItem('arcade_db', JSON.stringify(db));
+            alert("Password Updated");
         }
 
         function logout() { location.reload(); }
 
-        function switchGame(id) {
-            document.querySelectorAll('.game-screen').forEach(e => e.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(e => e.classList.remove('active'));
-            document.getElementById('game-'+id).classList.add('active');
+        function checkDefeat() {
+            if(settings.autoLogout) {
+                alert("You lost! Auto-logout enabled.");
+                logout();
+            }
         }
 
-        // --- CHAT SYSTEM ---
-        function loadChat() {
-            let db = JSON.parse(localStorage.getItem('ai_arcade_db'));
-            const msgs = db[currentUser].history || [];
-            const area = document.getElementById('chat-messages');
-            area.innerHTML = '';
-            if(msgs.length === 0) addMsg('ai', `Hi ${currentUser}! Ready to play?`);
-            else msgs.forEach(m => addMsg(m.s, m.t));
+        // --- NAVIGATION ---
+        function nav(page) {
+            document.querySelectorAll('.game-screen').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById('page-'+page).classList.add('active');
+            
+            if(page === 'tetris') startTetris();
+            if(page === 'minesweeper') initMines(10,10,10);
+            if(page === 'tictactoe') initTTT();
         }
 
-        function sendMessage() {
-            const inp = document.getElementById('chat-input');
-            const txt = inp.value.trim();
+        // --- CHAT ---
+        function sendMsg() {
+            const i = document.getElementById('chat-msg');
+            const txt = i.value.trim();
             if(!txt) return;
-            addMsg('user', txt);
-            saveMsg('user', txt);
-            inp.value = '';
-            
-            setTimeout(() => {
-                let resp = "I'm focusing on the game!";
-                if(txt.toLowerCase().includes('hello')) resp = "Greetings, gamer.";
-                if(txt.toLowerCase().includes('scrabble')) resp = "Use high value letters like Q and Z!";
-                addMsg('ai', resp);
-                saveMsg('ai', resp);
-            }, 1000);
+            addChat('user', txt);
+            i.value = '';
+            setTimeout(() => addChat('ai', "I'm analyzing your moves..."), 1000);
         }
-
-        function addMsg(sender, text) {
+        function addChat(s, t) {
             const d = document.createElement('div');
-            d.className = `message ${sender}`;
-            d.innerText = text;
-            const box = document.getElementById('chat-messages');
-            box.appendChild(d);
-            box.scrollTop = box.scrollHeight;
+            d.className = `message ${s}`;
+            d.innerText = t;
+            document.getElementById('chat-box').appendChild(d);
+            document.getElementById('chat-box').scrollTop = 9999;
         }
 
-        function saveMsg(s, t) {
-            let db = JSON.parse(localStorage.getItem('ai_arcade_db'));
-            db[currentUser].history.push({s, t});
-            localStorage.setItem('ai_arcade_db', JSON.stringify(db));
-        }
-
-        // --- GAME: GUESS CHARACTER (LOGIC TREE) ---
-        // A simple decision tree for demonstration
+        // --- GAME: AKINATOR (EXPANDED LOGIC) ---
+        // Basic Logic Tree for demonstration
         const akData = {
-            start: { q: "Is your character real (not fictional)?", y: 'real', n: 'fic' },
-            real: { q: "Is he a famous scientist?", y: 'einstein', n: 'elon' },
-            fic: { q: "Does the character have magical powers?", y: 'magic', n: 'nomagic' },
+            start: { q: "Is the character Real?", y: 'real', n: 'fic' },
             
-            // Magic Branch
-            magic: { q: "Does he go to a school for wizards?", y: 'harry', n: 'force' },
-            force: { q: "Does he use a lightsaber?", y: 'vader', n: 'pikachu' },
-            
-            // No Magic Branch
-            nomagic: { q: "Does he wear a high-tech suit?", y: 'ironman', n: 'mario' },
-            mario: { q: "Does he have a mustache and jump high?", y: 'mario_char', n: 'batman' },
+            // Real People
+            real: { q: "Is he/she a musician?", y: 'singer', n: 'actor' },
+            singer: { ans: "Taylor Swift" },
+            actor: { ans: "Tom Holland" },
 
-            // Characters
-            einstein: { ans: "Albert Einstein" },
-            elon: { ans: "Elon Musk" },
+            // Fictional
+            fic: { q: "Is the character an Object (like food, fire, etc)?", y: 'obj', n: 'humanoid' },
+            
+            // Objects
+            obj: { q: "Is he made of Fire?", y: 'firey', n: 'spongebob' },
+            firey: { ans: "Firey (BFDI)" },
+            spongebob: { ans: "SpongeBob SquarePants" },
+
+            // Humanoids
+            humanoid: { q: "Is the character from a Book?", y: 'book', n: 'screen' },
+            
+            // Books
+            book: { q: "Does he wear glasses and steal art/furniture?", y: 'theo', n: 'harry' },
+            theo: { ans: "Theodore Uris (The Goldfinch)" },
             harry: { ans: "Harry Potter" },
-            vader: { ans: "Darth Vader" },
-            pikachu: { ans: "Pikachu" },
-            ironman: { ans: "Iron Man" },
-            mario_char: { ans: "Super Mario" },
-            batman: { ans: "Batman" }
+
+            // TV/Movie
+            screen: { q: "Is it from Stranger Things?", y: 'st', n: 'mcu' },
+            st: { q: "Is she a child/teenager with a sister named Nancy?", y: 'holly', n: 'eleven' },
+            holly: { ans: "Holly Wheeler" },
+            eleven: { ans: "Eleven (Jane Hopper)" },
+            mcu: { ans: "Iron Man" }
         };
 
-        let akCurrentNode = 'start';
-
+        let akNode = 'start';
         function akStart() {
-            akCurrentNode = 'start';
+            akNode = 'start';
             document.getElementById('ak-controls').style.display = 'none';
-            document.getElementById('ak-game-btns').style.display = 'flex';
+            document.getElementById('ak-answers').style.display = 'grid';
             akUpdate();
         }
-
         function akUpdate() {
-            const node = akData[akCurrentNode];
-            const bubble = document.getElementById('ak-question');
-            
+            const node = akData[akNode];
+            const txt = document.getElementById('ak-text');
             if(node.ans) {
-                // Found answer
-                bubble.innerHTML = `I guess... <strong>${node.ans}</strong>!<br>Am I right?`;
-                document.getElementById('ak-game-btns').innerHTML = `<button class="guess-btn btn-yes" onclick="location.reload()">Play Again</button>`;
+                txt.innerHTML = `I guess... <strong>${node.ans}</strong>!`;
+                document.getElementById('ak-answers').style.display = 'none';
+                document.getElementById('ak-controls').style.display = 'grid';
+                document.getElementById('ak-controls').innerHTML = '<button onclick="akStart()">Play Again</button>';
             } else {
-                bubble.innerText = node.q;
+                txt.innerText = node.q;
             }
         }
-
-        function akAnswer(ans) {
-            const node = akData[akCurrentNode];
-            // Simple mapping: Probably/Yes -> y, No/MaybeNot -> n
-            // Random choice for DontKnow for this demo
-            if(ans === 'dontknow') ans = Math.random() > 0.5 ? 'yes' : 'no';
-            
-            if(ans === 'yes') akCurrentNode = node.y;
-            else akCurrentNode = node.n;
-
-            // If path missing, default to a generic guess (prevents crash in this limited demo)
-            if(!akData[akCurrentNode]) {
-                 document.getElementById('ak-question').innerText = "You stumped me! I don't know that one yet.";
-                 document.getElementById('ak-game-btns').style.display = 'none';
-                 return;
+        function akNext(val) {
+            // Simplified logic: y/p goes to Y, others go to N
+            const node = akData[akNode];
+            if(val === 'y' || val === 'p') akNode = node.y;
+            else akNode = node.n;
+            if(!akData[akNode]) {
+                document.getElementById('ak-text').innerText = "You stumped me! (Character list limit reached)";
+                document.getElementById('ak-answers').style.display = 'none';
+                document.getElementById('ak-controls').style.display = 'grid';
+                return;
             }
             akUpdate();
         }
 
-        // --- GAME: SCRABBLE ---
-        const tileScores = { A:1, B:3, C:3, D:2, E:1, F:4, G:2, H:4, I:1, J:8, K:5, L:1, M:3, N:1, O:1, P:3, Q:10, R:1, S:1, T:1, U:1, V:4, W:4, X:8, Y:4, Z:10, _:0 };
-        let scrBoard = Array(225).fill(null); // 15x15
-        let scrRack = [];
-        let selectedTileIdx = null;
-        let score = 0;
+        // --- GAME: TETRIS ---
+        let tCanvas, tCtx, tInterval;
+        const ROW = 20, COL = 10, SQ = 20;
+        let board = [], piece = null;
+        
+        function startTetris() {
+            tCanvas = document.getElementById('tetris');
+            tCtx = tCanvas.getContext('2d');
+            board = Array.from({length:ROW}, () => Array(COL).fill('black'));
+            piece = randomPiece();
+            clearInterval(tInterval);
+            tInterval = setInterval(tDrop, 1000);
+            drawTetris();
+        }
 
-        function initScrabble() {
-            const b = document.getElementById('scrabble-board');
-            b.innerHTML = '';
-            scrBoard.forEach((cell, i) => {
+        function drawSquare(x,y,color) {
+            tCtx.fillStyle = color;
+            tCtx.fillRect(x*SQ, y*SQ, SQ, SQ);
+            tCtx.strokeStyle = "#333";
+            tCtx.strokeRect(x*SQ, y*SQ, SQ, SQ);
+        }
+
+        function drawTetris() {
+            for(let r=0; r<ROW; r++) {
+                for(let c=0; c<COL; c++) drawSquare(c, r, board[r][c]);
+            }
+            if(piece) {
+                for(let r=0; r<piece.active.length; r++){
+                    for(let c=0; c<piece.active.length; c++){
+                        if(piece.active[r][c]) drawSquare(piece.x+c, piece.y+r, piece.color);
+                    }
+                }
+            }
+        }
+
+        function tDrop() {
+            if(!piece) return;
+            if(!collision(0, 1, piece.active)) {
+                piece.y++;
+                drawTetris();
+            } else {
+                lockPiece();
+                piece = randomPiece();
+            }
+        }
+
+        function collision(x,y,shape) {
+            for(let r=0; r<shape.length; r++){
+                for(let c=0; c<shape.length; c++){
+                    if(!shape[r][c]) continue;
+                    let newX = piece.x + c + x;
+                    let newY = piece.y + r + y;
+                    if(newX < 0 || newX >= COL || newY >= ROW) return true;
+                    if(newY < 0) continue;
+                    if(board[newY][newX] != 'black') return true;
+                }
+            }
+            return false;
+        }
+
+        function lockPiece() {
+            for(let r=0; r<piece.active.length; r++){
+                for(let c=0; c<piece.active.length; c++){
+                    if(!piece.active[r][c]) continue;
+                    if(piece.y + r < 0) {
+                        alert("Game Over");
+                        clearInterval(tInterval);
+                        checkDefeat();
+                        return;
+                    }
+                    board[piece.y+r][piece.x+c] = piece.color;
+                }
+            }
+            // Remove full rows
+            for(let r=0; r<ROW; r++) {
+                if(board[r].every(c => c != 'black')) {
+                    board.splice(r, 1);
+                    board.unshift(Array(COL).fill('black'));
+                    document.getElementById('tetris-score').innerText = parseInt(document.getElementById('tetris-score').innerText) + 10;
+                }
+            }
+            drawTetris();
+        }
+        
+        // Simple I, J, L, O, Z, S, T shapes
+        const PIECES = [
+            [Z,"red"], [S,"green"], [T,"yellow"], [O,"blue"], [L,"purple"], [I,"cyan"], [J,"orange"]
+        ];
+        var Z = [[[1,1,0],[0,1,1],[0,0,0]]]; // Simplified for brevity
+        var S = [[[0,1,1],[1,1,0],[0,0,0]]];
+        var T = [[[0,1,0],[1,1,1],[0,0,0]]];
+        var O = [[[1,1],[1,1]]];
+        var L = [[[0,0,1],[1,1,1],[0,0,0]]];
+        var I = [[[0,1,0,0],[0,1,0,0],[0,1,0,0],[0,1,0,0]]];
+        var J = [[[1,0,0],[1,1,1],[0,0,0]]];
+
+        function randomPiece(){
+            let r = Math.floor(Math.random() * PIECES.length);
+            return { active: PIECES[r][0], color: PIECES[r][1], x: 3, y: -2 };
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if(!piece) return;
+            if(e.key === 'ArrowLeft' && !collision(-1,0,piece.active)) piece.x--;
+            else if(e.key === 'ArrowRight' && !collision(1,0,piece.active)) piece.x++;
+            else if(e.key === 'ArrowDown') tDrop();
+            else if(e.key === 'ArrowUp') {
+                // Rotation logic omitted for brevity in single file, placeholder
+            }
+            drawTetris();
+        });
+
+        // --- GAME: MINESWEEPER ---
+        function initMines(rows, cols, mines) {
+            const grid = document.getElementById('mines-board');
+            grid.style.gridTemplateColumns = `repeat(${cols}, 30px)`;
+            grid.innerHTML = '';
+            
+            // Create cells
+            let cells = [];
+            for(let i=0; i<rows*cols; i++) {
                 const d = document.createElement('div');
-                d.className = 'scr-cell';
-                if(i===112) d.classList.add('center'); // Center star
-                // Simple bonus patterns
-                if([0,7,14, 105, 119, 210, 217, 224].includes(i)) { d.classList.add('bonus-tw'); d.innerText="TW"; }
-                
-                d.onclick = () => placeTile(i);
-                d.id = `scrcell-${i}`;
-                b.appendChild(d);
-            });
-            drawTiles();
-        }
+                d.className = 'mine-cell';
+                d.onclick = () => revealMine(d, i, cells, rows, cols);
+                grid.appendChild(d);
+                cells.push({ el: d, bomb: false, revealed: false, count: 0 });
+            }
 
-        function drawTiles() {
-            // Simplified bag
-            const alpha = "AAAAAAAABBCCDDDDEEEEEEEEEEEFFGGGHHIIIIIIIIIJKLLLLMMNNNNNNOOOOOOOOPPQRRRRRRSSSSTTTTTTUUUUVVWWXYYZ";
-            scrRack = [];
-            for(let i=0; i<7; i++) scrRack.push(alpha[Math.floor(Math.random()*alpha.length)]);
-            renderRack();
-        }
+            // Place mines
+            let m = 0;
+            while(m < mines) {
+                let idx = Math.floor(Math.random() * cells.length);
+                if(!cells[idx].bomb) { cells[idx].bomb = true; m++; }
+            }
 
-        function renderRack() {
-            const r = document.getElementById('scr-rack');
-            r.innerHTML = '';
-            scrRack.forEach((l, i) => {
-                if(l === null) return;
-                const t = document.createElement('div');
-                t.className = `tile ${selectedTileIdx === i ? 'selected' : ''}`;
-                t.innerText = l;
-                t.onclick = () => { selectedTileIdx = i; renderRack(); };
-                r.appendChild(t);
+            // Calc counts
+            cells.forEach((c, i) => {
+                if(c.bomb) return;
+                let neighbors = getNeighbors(i, rows, cols);
+                let count = neighbors.filter(n => cells[n].bomb).length;
+                c.count = count;
             });
         }
 
-        function placeTile(boardIdx) {
-            if(selectedTileIdx === null || scrBoard[boardIdx]) return;
-            
-            const letter = scrRack[selectedTileIdx];
-            scrBoard[boardIdx] = letter; // Logic
-            
-            // Visual
-            const cell = document.getElementById(`scrcell-${boardIdx}`);
-            cell.innerHTML = `<div class="tile" style="width:100%; height:100%">${letter}<sub style="font-size:0.5rem; margin-left:2px;">${tileScores[letter]}</sub></div>`;
-            
-            scrRack[selectedTileIdx] = null;
-            selectedTileIdx = null;
-            renderRack();
+        function getNeighbors(i, r, c) {
+            let n = [];
+            let x = i % c, y = Math.floor(i / c);
+            for(let dx=-1; dx<=1; dx++) {
+                for(let dy=-1; dy<=1; dy++) {
+                    if(dx===0 && dy===0) continue;
+                    let nx = x+dx, ny = y+dy;
+                    if(nx>=0 && nx<c && ny>=0 && ny<r) n.push(ny*c + nx);
+                }
+            }
+            return n;
         }
 
-        function submitWord() {
-            // In a real game, this would validate dictionary and connectivity
-            // Here we just sum the points of recently placed tiles for demo
-            alert("Word Submitted! (AI Validation: Good Word!)");
-            let turnScore = 0;
-            // Dummy scoring for demo
-            score += Math.floor(Math.random() * 15) + 5; 
-            document.getElementById('scr-score').innerText = `Score: ${score}`;
-            drawTiles(); // Refill rack
+        function revealMine(el, i, cells, r, c) {
+            let cell = cells[i];
+            if(cell.revealed) return;
+            cell.revealed = true;
+            el.classList.add('revealed');
+            
+            if(cell.bomb) {
+                el.classList.add('bomb');
+                el.innerText = '💣';
+                alert("Boom! Game Over.");
+                checkDefeat();
+            } else {
+                if(cell.count > 0) el.innerText = cell.count;
+                // Flood fill if 0 (omitted for brevity)
+            }
         }
 
-        // --- GAME: TIC TAC TOE (Previous Logic) ---
+        // --- GAME: TTT ---
         let tttBoard = Array(9).fill(null);
         function initTTT() {
-            const c = document.getElementById('ttt-board');
-            c.innerHTML = '';
-            tttBoard.forEach((v, i) => {
-                const d = document.createElement('div');
+            tttBoard.fill(null);
+            document.getElementById('ttt-msg').innerText = "Your Turn";
+            const g = document.getElementById('ttt-board');
+            g.innerHTML = '';
+            for(let i=0; i<9; i++) {
+                let d = document.createElement('div');
                 d.className = 'ttt-cell';
-                d.innerText = v || '';
-                d.onclick = () => moveTTT(i);
-                c.appendChild(d);
-            });
+                d.onclick = () => playTTT(i);
+                d.id = 't'+i;
+                g.appendChild(d);
+            }
         }
-        function moveTTT(i) {
+        function playTTT(i) {
             if(tttBoard[i]) return;
             tttBoard[i] = 'X';
-            initTTT();
-            // Simple AI Random Move
-            setTimeout(() => {
-                const empty = tttBoard.map((e,x)=>e?null:x).filter(e=>e!==null);
-                if(empty.length>0) {
-                    tttBoard[empty[Math.floor(Math.random()*empty.length)]] = 'O';
-                    initTTT();
-                }
-            }, 500);
+            document.getElementById('t'+i).innerText = 'X';
+            if(checkWin('X')) return;
+            
+            // AI
+            let empty = tttBoard.map((v,k)=>v?null:k).filter(v=>v!==null);
+            if(empty.length===0) return;
+            let move = empty[Math.floor(Math.random()*empty.length)];
+            tttBoard[move] = 'O';
+            document.getElementById('t'+move).innerText = 'O';
+            if(checkWin('O')) {
+                alert("AI Wins!");
+                checkDefeat();
+            }
         }
-        function resetTTT() { tttBoard.fill(null); initTTT(); }
+        function checkWin(p) {
+            const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+            if(wins.some(w => tttBoard[w[0]]==p && tttBoard[w[1]]==p && tttBoard[w[2]]==p)) {
+                document.getElementById('ttt-msg').innerText = p + " Wins!";
+                return true;
+            }
+            return false;
+        }
 
     </script>
 </body>
-    </html>
+                </html>
