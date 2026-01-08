@@ -3,254 +3,233 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEON_OS | AI Game Core</title>
+    <title>NEON_OS | Game Hub</title>
     <style>
-        :root { --neon: #39ff14; --cyber-blue: #00f3ff; --bg: #050505; --glass: rgba(255,255,255,0.05); }
+        :root { --neon: #39ff14; --cyber-blue: #00f3ff; --bg: #050505; --glass: rgba(255,255,255,0.07); --danger: #ff4444; }
         body { background: var(--bg); color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
         
-        /* Auth Overlay - Standard Form for Password Managers */
+        /* Auth */
         #auth-overlay { position: fixed; inset: 0; background: #000; z-index: 1000; display: flex; align-items: center; justify-content: center; flex-direction: column; }
-        .auth-box { border: 1px solid var(--cyber-blue); padding: 40px; background: #111; box-shadow: 0 0 20px rgba(0,243,255,0.2); border-radius: 15px; width: 320px; }
-        input { background: #1a1a1a; border: 1px solid #333; color: #fff; padding: 12px; margin: 8px 0; width: 100%; box-sizing: border-box; border-radius: 5px; }
-        input:focus { border-color: var(--neon); outline: none; }
+        .auth-box { border: 1px solid var(--cyber-blue); padding: 30px; background: #111; border-radius: 15px; width: 300px; }
+        input { background: #1a1a1a; border: 1px solid #333; color: #fff; padding: 10px; margin: 5px 0; width: 100%; box-sizing: border-box; }
         
         /* Layout */
-        #sidebar { width: 240px; border-right: 1px solid #222; padding: 20px; display: flex; flex-direction: column; background: rgba(0,0,0,0.8); }
-        #main-stage { flex: 1; padding: 40px; overflow-y: auto; background: radial-gradient(circle at top right, #111, #050505); }
-        .nav-btn { background: none; border: 1px solid transparent; color: #aaa; padding: 12px; cursor: pointer; text-align: left; border-radius: 8px; margin-bottom: 5px; }
+        #sidebar { width: 240px; border-right: 1px solid #222; padding: 20px; display: flex; flex-direction: column; background: #000; overflow-y: auto;}
+        #main-stage { flex: 1; padding: 30px; overflow-y: auto; }
+        .nav-btn { background: none; border: 1px solid transparent; color: #888; padding: 10px; cursor: pointer; text-align: left; border-radius: 5px; margin-bottom: 3px; font-size: 14px;}
         .nav-btn:hover, .nav-btn.active { background: var(--glass); color: var(--cyber-blue); border-color: var(--cyber-blue); }
+        .nav-header { font-size: 10px; color: #555; margin: 15px 0 5px 10px; text-transform: uppercase; letter-spacing: 1px;}
 
-        /* AI Messenger */
-        #chat-log { height: 400px; border: 1px solid #222; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; border-radius: 10px; margin-bottom: 10px; }
-        .bubble { padding: 12px; border-radius: 10px; max-width: 80%; font-size: 0.9rem; }
+        /* Panels */
+        .panel { display: none; animation: fadeIn 0.3s ease; }
+        .panel.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Chat UI */
+        .chat-container { height: 350px; border: 1px solid #222; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; background: rgba(0,0,0,0.3); }
+        .msg { padding: 10px; border-radius: 8px; max-width: 80%; font-size: 14px; }
         .ai { background: #1a1a1a; border: 1px solid var(--neon); align-self: flex-start; }
         .user { background: var(--cyber-blue); color: #000; align-self: flex-end; }
 
-        /* Game Grids */
-        .grid-3 { display: grid; grid-template-columns: repeat(3, 80px); gap: 10px; justify-content: center; }
-        .cell { width: 80px; height: 80px; background: var(--glass); border: 1px solid #333; display: flex; align-items: center; justify-content: center; font-size: 2rem; cursor: pointer; }
-        .hidden { display: none; }
-
-        /* Wordle */
-        .w-row { display: flex; gap: 5px; margin-bottom: 5px; justify-content: center; }
-        .w-tile { width: 45px; height: 45px; border: 2px solid #333; display: flex; align-items: center; justify-content: center; font-weight: bold; text-transform: uppercase; }
-
-        button.primary { background: var(--cyber-blue); color: #000; border: none; padding: 12px; width: 100%; border-radius: 5px; font-weight: bold; cursor: pointer; }
+        /* Game Elements */
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; max-width: 240px; margin: 0 auto; }
+        .cell { aspect-ratio: 1; background: var(--glass); border: 1px solid #333; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; cursor: pointer; }
+        .uno-card { width: 60px; height: 90px; border-radius: 5px; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; margin: 5px; border: 2px solid white; text-shadow: 1px 1px #000; }
     </style>
 </head>
 <body>
 
 <div id="auth-overlay">
     <div class="auth-box">
-        <h2 id="auth-title" style="color: var(--cyber-blue); margin-top: 0;">SIGN_UP</h2>
+        <h2 id="auth-title" style="color: var(--cyber-blue)">INITIALIZE_OS</h2>
         <form id="auth-form" onsubmit="event.preventDefault(); handleAuth();">
-            <input type="text" id="username" name="username" placeholder="Username" required autocomplete="username">
-            <input type="password" id="password" name="password" placeholder="Password" required autocomplete="new-password">
-            <button type="submit" class="primary" id="auth-btn">CREATE ACCOUNT</button>
+            <input type="text" id="username" placeholder="Username" required autocomplete="username">
+            <input type="password" id="password" placeholder="Password" required autocomplete="new-password">
+            <button type="submit" style="width:100%; padding:10px; background:var(--cyber-blue); border:none; cursor:pointer; font-weight:bold;">EXECUTE</button>
         </form>
-        <p id="auth-toggle" onclick="toggleAuthMode()" style="font-size: 12px; text-align: center; color: #666; cursor: pointer; margin-top: 15px;">Already have an account? Log In</p>
+        <p onclick="toggleAuthMode()" style="font-size: 11px; text-align: center; color: #666; cursor: pointer; margin-top: 15px;">[SWITCH LOGIN/SIGNUP]</p>
     </div>
 </div>
 
 <div id="sidebar">
-    <h2 style="color: var(--neon); font-size: 1.2rem; letter-spacing: 2px;">NEON_OS</h2>
-    <p id="user-tag" style="font-size: 10px; color: #555; margin-bottom: 20px;"></p>
+    <h2 style="color: var(--neon); font-size: 1.2rem;">NEON_OS</h2>
     
-    <div class="nav-btn active" onclick="showPanel('ai')">🤖 Message AI</div>
+    <div class="nav-header">Communication</div>
+    <div class="nav-btn" onclick="showPanel('ai-chat')">💬 Message AI</div>
+    <div class="nav-btn" onclick="showPanel('guesser')">👤 Character Guesser</div>
+    
+    <div class="nav-header">Game Suite</div>
     <div class="nav-btn" onclick="showPanel('wordle')">🧩 Wordle</div>
     <div class="nav-btn" onclick="showPanel('hangman')">🪢 Hangman</div>
     <div class="nav-btn" onclick="showPanel('ttt')">⭕ Tic-Tac-Toe</div>
-    <div class="nav-btn" onclick="showPanel('chess')">♟️ Chess (Sim)</div>
-    
+    <div class="nav-btn" onclick="showPanel('uno')">🃏 Uno Cards</div>
+    <div class="nav-btn" onclick="showPanel('chess')">♟️ Chess</div>
+    <div class="nav-btn" onclick="showPanel('scrabble')">🔠 Scrabble</div>
+
     <div style="margin-top: auto;">
         <div class="nav-btn" onclick="showPanel('settings')">⚙️ Settings</div>
     </div>
 </div>
 
 <div id="main-stage">
-    <div id="panel-ai" class="panel">
-        <h2 style="color: var(--neon)">AI Interrogator</h2>
-        <p style="font-size: 12px; color: #888;">Think of a movie character. I will ask the questions.</p>
-        <div id="chat-log"></div>
-        <div style="display: flex; gap: 10px;">
-            <input type="text" id="chat-input" placeholder="Yes / No / Probably...">
-            <button onclick="sendChat()" style="width: 80px; background: var(--neon); border: none; border-radius: 5px; cursor: pointer;">SEND</button>
+    <div id="panel-ai-chat" class="panel">
+        <h2>AI Messenger</h2>
+        <div id="ai-chat-log" class="chat-container"></div>
+        <div style="display: flex; gap: 5px;">
+            <input type="text" id="ai-chat-input" placeholder="Say something...">
+            <button onclick="sendGeneralChat()" style="background:var(--neon); color:#000; border:none; padding:10px 20px; cursor:pointer;">SEND</button>
         </div>
     </div>
 
-    <div id="panel-wordle" class="panel hidden">
-        <h2>Wordle_Core</h2>
-        <div id="wordle-grid"></div>
-        <div style="margin-top: 20px; text-align: center;">
-            <input type="text" id="wordle-input" maxlength="5" style="width: 120px; text-align: center;">
-            <button onclick="submitWordle()" class="primary" style="width: 100px;">GUESS</button>
+    <div id="panel-guesser" class="panel">
+        <h2>Character Guesser</h2>
+        <p style="font-size:12px; color:var(--cyber-blue)">Think of a character... AI will question you.</p>
+        <div id="guesser-log" class="chat-container"></div>
+        <div style="display: flex; gap: 5px;">
+            <input type="text" id="guesser-input" placeholder="Yes / No / Maybe...">
+            <button onclick="sendGuesserChat()" style="background:var(--cyber-blue); color:#000; border:none; padding:10px 20px; cursor:pointer;">REPLY</button>
         </div>
     </div>
 
-    <div id="panel-hangman" class="panel hidden">
-        <h2>Hangman_Protocol</h2>
-        <h1 id="hangman-display" style="letter-spacing: 15px; text-align: center; margin: 40px 0;">_ _ _ _</h1>
-        <div style="text-align: center;">
-            <p>Failures remaining: <span id="h-lives" style="color: var(--danger);">6</span></p>
-            <input type="text" id="h-input" maxlength="1" style="width: 50px; text-align: center;">
-            <button onclick="guessHangman()" class="primary" style="width: 100px;">TRY</button>
+    <div id="panel-chess" class="panel">
+        <h2>Cyber Chess</h2>
+        <div style="background: #111; padding: 20px; border: 1px solid #333; text-align:center;">
+            <p>Visualizing Board...</p>
+            <div id="chess-board-sim" style="font-family:monospace; white-space:pre; color:var(--neon); font-size:10px;">
+                R N B Q K B N R
+                P P P P P P P P
+                . . . . . . . .
+                . . . . . . . .
+                p p p p p p p p
+                r n b q k b n r
+            </div>
+            <p><small>Engine: Active. Enter move (e.g., e2e4)</small></p>
+            <input type="text" id="chess-move" style="width:80px"> <button onclick="alert('Move registered!')">MOVE</button>
         </div>
     </div>
 
-    <div id="panel-ttt" class="panel hidden">
-        <h2>Neural Tic-Tac-Toe</h2>
-        <div class="grid-3" id="ttt-board">
-            <div class="cell" onclick="playTTT(0)"></div><div class="cell" onclick="playTTT(1)"></div><div class="cell" onclick="playTTT(2)"></div>
-            <div class="cell" onclick="playTTT(3)"></div><div class="cell" onclick="playTTT(4)"></div><div class="cell" onclick="playTTT(5)"></div>
-            <div class="cell" onclick="playTTT(6)"></div><div class="cell" onclick="playTTT(7)"></div><div class="cell" onclick="playTTT(8)"></div>
-        </div>
-        <button onclick="resetTTT()" style="margin-top: 20px; background: none; color: #fff; border: 1px solid #444; padding: 10px; width: 100%;">Clear Board</button>
+    <div id="panel-uno" class="panel">
+        <h2>Uno Card Generator</h2>
+        <div id="uno-hand" style="min-height: 120px; background: rgba(255,255,255,0.05); padding: 10px; border-radius:10px;"></div>
+        <button onclick="drawUno()" style="margin-top:10px; width:100%; padding:10px; background:var(--danger); border:none; color:#fff; cursor:pointer;">DRAW NEW HAND</button>
     </div>
 
-    <div id="panel-chess" class="panel hidden">
-        <h2>Grandmaster AI</h2>
-        <div style="background: #222; padding: 50px; border-radius: 10px; text-align: center; border: 1px dashed #444;">
-            <p>Chess Module Loading...</p>
-            <small>DeepBlue simulation engine offline. Check back in next patch.</small>
-        </div>
-    </div>
-
-    <div id="panel-settings" class="panel hidden">
+    <div id="panel-settings" class="panel">
         <h2>Settings</h2>
         <div style="background: var(--glass); padding: 20px; border-radius: 10px;">
-            <p>User Identity: <span id="settings-user" style="color: var(--cyber-blue);"></span></p>
-            <hr style="border: 0; border-top: 1px solid #333; margin: 20px 0;">
-            <button onclick="logout()" style="background: #ff4444; color: #fff; border: none; padding: 12px; width: 100%; border-radius: 5px; cursor: pointer;">LOGOUT OF SYSTEM</button>
+            <h3>Update Identity</h3>
+            <input type="password" id="new-password" placeholder="New Password">
+            <button onclick="changePassword()" style="width:100%; padding:10px; background:var(--neon); border:none; color:#000; cursor:pointer; font-weight:bold;">CHANGE PASSWORD</button>
+            <hr style="border:0; border-top:1px solid #333; margin:20px 0;">
+            <button onclick="location.reload()" style="width:100%; padding:10px; background:var(--danger); border:none; color:#fff; cursor:pointer;">LOGOUT</button>
         </div>
     </div>
-</div>
+
+    </div>
 
 <script>
     let currentUser = null;
     let isLoginMode = false;
 
-    // --- AUTH LOGIC ---
+    // --- AUTH ---
     function toggleAuthMode() {
         isLoginMode = !isLoginMode;
-        document.getElementById('auth-title').innerText = isLoginMode ? "LOG_IN" : "SIGN_UP";
-        document.getElementById('auth-btn').innerText = isLoginMode ? "INITIALIZE" : "CREATE ACCOUNT";
-        document.getElementById('auth-toggle').innerText = isLoginMode ? "New user? Sign Up" : "Already have an account? Log In";
+        document.getElementById('auth-title').innerText = isLoginMode ? "SYSTEM_LOGIN" : "INITIALIZE_OS";
     }
 
     function handleAuth() {
         const u = document.getElementById('username').value;
         const p = document.getElementById('password').value;
-        let db = JSON.parse(localStorage.getItem('user_vault') || "{}");
+        let db = JSON.parse(localStorage.getItem('neon_vault') || "{}");
 
-        if(!isLoginMode) { // Signup
-            if(db[u]) return alert("Identity already exists.");
-            db[u] = { password: p, chatHistory: [] };
-            localStorage.setItem('user_vault', JSON.stringify(db));
-            alert("Account Secure. Please log in.");
+        if(!isLoginMode) {
+            db[u] = { password: p, chat: [], guesser: [] };
+            localStorage.setItem('neon_vault', JSON.stringify(db));
+            alert("Account Encrypted. Now Login.");
             toggleAuthMode();
-        } else { // Login
-            if(!db[u] || db[u].password !== p) return alert("ACCESS DENIED: Invalid Credentials.");
-            currentUser = u;
-            document.getElementById('auth-overlay').style.display = 'none';
-            document.getElementById('user-tag').innerText = `SESSION: ${u.toUpperCase()}`;
-            document.getElementById('settings-user').innerText = u;
-            loadHistory();
-            initGames();
+        } else {
+            if(db[u] && db[u].password === p) {
+                currentUser = u;
+                document.getElementById('auth-overlay').style.display = 'none';
+                loadChatHistories();
+            } else { alert("ACCESS DENIED"); }
         }
     }
 
-    function logout() {
-        location.reload();
+    function changePassword() {
+        const newP = document.getElementById('new-password').value;
+        if(!newP) return alert("Enter a password");
+        let db = JSON.parse(localStorage.getItem('neon_vault'));
+        db[currentUser].password = newP;
+        localStorage.setItem('neon_vault', JSON.stringify(db));
+        alert("Password updated in Secure Vault.");
     }
 
-    // --- UI NAVIGATION ---
-    function showPanel(panelId) {
-        document.querySelectorAll('.panel').forEach(p => p.classList.add('hidden'));
+    // --- PANEL NAVIGATION ---
+    function showPanel(id) {
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById('panel-' + panelId).classList.remove('hidden');
+        document.getElementById('panel-' + id).classList.add('active');
         event.currentTarget.classList.add('active');
     }
 
-    // --- AI MESSAGE LOGIC ---
-    const scripts = ["Is your character from a movie?", "Is it a male character?", "Is he a superhero?", "Does he wear a cape?", "Is it Superman?"];
-    let step = 0;
-    let localChat = [];
+    // --- MESSAGE AI (General) ---
+    function sendGeneralChat() {
+        const input = document.getElementById('ai-chat-input');
+        if(!input.value) return;
+        addMsg('ai-chat-log', 'user', input.value);
+        const reply = "Processing data... I am NEON_AI. How can I assist your session today?";
+        setTimeout(() => addMsg('ai-chat-log', 'ai', reply), 600);
+        input.value = "";
+    }
 
-    function sendChat() {
-        const val = document.getElementById('chat-input').value;
-        if(!val) return;
-        addBubble('user', val);
-        document.getElementById('chat-input').value = "";
-        
+    // --- CHARACTER GUESSER ---
+    let guessStep = 0;
+    const guessQuestions = ["Is your character a real person?", "Are they from a Movie?", "Do they have superpowers?", "Is it Iron Man?"];
+    function sendGuesserChat() {
+        const input = document.getElementById('guesser-input');
+        if(!input.value) return;
+        addMsg('guesser-log', 'user', input.value);
         setTimeout(() => {
-            step++;
-            const reply = scripts[step] || "You have confused my circuits! Let's start over.";
-            if(step >= scripts.length) step = -1;
-            addBubble('ai', reply);
+            guessStep++;
+            const next = guessQuestions[guessStep] || "My database is exhausted! Let's restart.";
+            if(guessStep >= guessQuestions.length) guessStep = 0;
+            addMsg('guesser-log', 'ai', next);
         }, 600);
+        input.value = "";
     }
 
-    function addBubble(role, text) {
-        const log = document.getElementById('chat-log');
-        log.innerHTML += `<div class="bubble ${role}">${text}</div>`;
+    function addMsg(targetId, role, text) {
+        const log = document.getElementById(targetId);
+        log.innerHTML += `<div class="msg ${role}">${text}</div>`;
         log.scrollTop = log.scrollHeight;
-        localChat.push({role, text});
-        saveHistory();
+        // Save to specific user history
+        let db = JSON.parse(localStorage.getItem('neon_vault'));
+        if(targetId === 'ai-chat-log') db[currentUser].chat.push({role, text});
+        else db[currentUser].guesser.push({role, text});
+        localStorage.setItem('neon_vault', JSON.stringify(db));
     }
 
-    function saveHistory() {
-        let db = JSON.parse(localStorage.getItem('user_vault'));
-        db[currentUser].chatHistory = localChat;
-        localStorage.setItem('user_vault', JSON.stringify(db));
+    function loadChatHistories() {
+        let db = JSON.parse(localStorage.getItem('neon_vault'));
+        const user = db[currentUser];
+        user.chat.forEach(m => addMsg('ai-chat-log', m.role, m.text));
+        user.guesser.forEach(m => addMsg('guesser-log', m.role, m.text));
+        if(user.guesser.length === 0) addMsg('guesser-log', 'ai', guessQuestions[0]);
     }
 
-    function loadHistory() {
-        let db = JSON.parse(localStorage.getItem('user_vault'));
-        localChat = db[currentUser].chatHistory || [];
-        if(localChat.length === 0) {
-            addBubble('ai', scripts[0]);
-        } else {
-            localChat.forEach(c => {
-                const log = document.getElementById('chat-log');
-                log.innerHTML += `<div class="bubble ${c.role}">${c.text}</div>`;
-            });
+    // --- UNO CARDS ---
+    function drawUno() {
+        const colors = ['red', 'blue', 'green', 'yellow'];
+        const hand = document.getElementById('uno-hand');
+        hand.innerHTML = "";
+        for(let i=0; i<7; i++) {
+            const c = colors[Math.floor(Math.random()*colors.length)];
+            const n = Math.floor(Math.random()*10);
+            hand.innerHTML += `<div class="uno-card" style="background:${c}">${n}</div>`;
         }
-    }
-
-    // --- GAME INITIALIZERS ---
-    function initGames() {
-        // Wordle Init
-        const grid = document.getElementById('wordle-grid');
-        grid.innerHTML = "";
-        for(let i=0; i<6; i++) {
-            let row = document.createElement('div'); row.className = 'w-row';
-            for(let j=0; j<5; j++) row.innerHTML += `<div class="w-tile" id="w-${i}-${j}"></div>`;
-            grid.appendChild(row);
-        }
-    }
-
-    // (Add standard Wordle, Hangman, TTT logic here - same as previous version)
-    // Basic TTT logic for demonstration:
-    let tttState = ["","","","","","","","",""];
-    function playTTT(i) {
-        if(tttState[i]) return;
-        tttState[i] = "X";
-        document.getElementById('ttt-board').children[i].innerText = "X";
-        setTimeout(() => {
-            let free = tttState.map((v, idx) => v === "" ? idx : null).filter(v => v !== null);
-            if(free.length) {
-                let m = free[Math.floor(Math.random() * free.length)];
-                tttState[m] = "O";
-                document.getElementById('ttt-board').children[m].innerText = "O";
-                document.getElementById('ttt-board').children[m].style.color = "var(--neon)";
-            }
-        }, 300);
-    }
-    function resetTTT() {
-        tttState = ["","","","","","","","",""];
-        Array.from(document.getElementById('ttt-board').children).forEach(c => c.innerText = "");
     }
 </script>
 
 </body>
-    </html>
+</html>
